@@ -57,18 +57,36 @@ func DeriveKey(passphrase string, salt [SaltSize]byte, iterations int) (SessionK
 		return SessionKey{}, ErrInvalidIterations
 	}
 
-	var key SessionKey
-	hmac := hmac.New(sha256.New, salt[:])
-	hmac.Write([]byte(passphrase))
-	key = SessionKey(hmac.Sum(key[:0]))
+	h := hmac.New(sha256.New, []byte(passphrase))
 
-	for i := 0; i < iterations-1; i++ {
-		hmac.Reset()
-		hmac.Write(key[:])
-		key = SessionKey(hmac.Sum(key[:0]))
+	var msg [SaltSize + 4]byte
+	copy(msg[:], salt[:])
+	binary.BigEndian.PutUint32(msg[SaltSize:], 1)
+
+	h.Write(msg[:])
+	u := h.Sum(nil)
+
+	var key SessionKey
+	copy(key[:], u)
+
+	for i := 1; i < iterations; i++ {
+		h.Reset()
+		h.Write(u)
+		u = h.Sum(u[:0])
+		for j := range key {
+			key[j] ^= u[j]
+		}
 	}
 
 	return key, nil
+}
+
+func DeriveSubKey(passphrase string, salt [SaltSize]byte) SessionKey {
+	var key SessionKey
+	h := hmac.New(sha256.New, []byte(passphrase))
+	h.Write(salt[:])
+	copy(key[:], h.Sum(nil))
+	return key
 }
 
 func DeriveKeyWithCounter(passphrase string, salt [SaltSize]byte, iterations int, counter uint64) (SessionKey, error) {
@@ -314,8 +332,7 @@ func NewDeterministicRNG(seed []byte) (*DeterministicRNG, error) {
 	if len(seed) >= KeySize {
 		copy(key[:], seed[:KeySize])
 	} else {
-		var sum [sha256.Size]byte
-		sum = sha256.Sum256(seed)
+		sum := sha256.Sum256(seed)
 		key = SessionKey(sum)
 	}
 
@@ -333,7 +350,7 @@ func (r *DeterministicRNG) Read(p []byte) (int, error) {
 
 func (r *DeterministicRNG) Uint64() uint64 {
 	var buf [8]byte
-	r.stream.Read(buf[:])
+	_, _ = r.stream.Read(buf[:])
 	return binary.BigEndian.Uint64(buf[:])
 }
 

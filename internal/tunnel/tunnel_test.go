@@ -302,6 +302,7 @@ func TestWriteReadPacket(t *testing.T) {
 	sessionKey := crypto.SessionKey(key)
 	enc := crypto.NewEncryptor(sessionKey, 0)
 	dec := crypto.NewDecryptor(sessionKey, 0)
+	dec.SetNoncePrefix(enc.NoncePrefix())
 
 	original := &PlainPacket{
 		Type:    PacketReal,
@@ -332,6 +333,7 @@ func TestWriteReadRawPacket(t *testing.T) {
 	sessionKey := crypto.SessionKey(key)
 	enc := crypto.NewEncryptor(sessionKey, 0)
 	dec := crypto.NewDecryptor(sessionKey, 0)
+	dec.SetNoncePrefix(enc.NoncePrefix())
 
 	data := []byte("raw data for test")
 	var buf bytes.Buffer
@@ -355,6 +357,7 @@ func TestWriteReadPacketEmpty(t *testing.T) {
 	sessionKey := crypto.SessionKey(key)
 	enc := crypto.NewEncryptor(sessionKey, 0)
 	dec := crypto.NewDecryptor(sessionKey, 0)
+	dec.SetNoncePrefix(enc.NoncePrefix())
 
 	var buf bytes.Buffer
 	if _, err := WriteRawPacket(&buf, []byte{}, enc); err != nil {
@@ -396,6 +399,7 @@ func TestMultipleEncryptedPackets(t *testing.T) {
 	sessionKey := crypto.SessionKey(key)
 	enc := crypto.NewEncryptor(sessionKey, 0)
 	dec := crypto.NewDecryptor(sessionKey, 0)
+	dec.SetNoncePrefix(enc.NoncePrefix())
 
 	var buf bytes.Buffer
 	for i := 0; i < 100; i++ {

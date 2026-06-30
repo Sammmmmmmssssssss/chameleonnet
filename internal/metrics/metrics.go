@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	"io"
+	"runtime"
 	"sync/atomic"
 	"time"
 )
@@ -105,7 +106,6 @@ func (h *Histogram) Reset() {
 type PoolAllocationTracker struct {
 	lastTotal     int64
 	peakDelta     int64
-	spikeCount    int64
 	spikeMu       atomic.Int64
 }
 
@@ -209,25 +209,25 @@ func (m *ProxyMetrics) Snapshot() MetricsSnapshot {
 }
 
 func (s MetricsSnapshot) Fprint(w io.Writer) {
-	fmt.Fprintf(w, "\n=== ChameleonNet Metrics ===\n")
-	fmt.Fprintf(w, "Uptime:        %s\n", s.Uptime.Round(time.Second))
-	fmt.Fprintf(w, "Time:          %s\n", s.Timestamp.Format("15:04:05"))
-	fmt.Fprintf(w, "--- Traffic ---\n")
-	fmt.Fprintf(w, "Bytes Up:      %s (%d pkts)\n", formatBytes(s.BytesUp), s.PacketsUp)
-	fmt.Fprintf(w, "Bytes Down:    %s (%d pkts)\n", formatBytes(s.BytesDown), s.PacketsDown)
-	fmt.Fprintf(w, "Chaff Sent:    %s (%d pkts)\n", formatBytes(s.ChaffSent), s.PacketsChaff)
-	fmt.Fprintf(w, "Total:         %s (%d pkts)\n", formatBytes(s.BytesTotal), s.PacketsTotal)
-	fmt.Fprintf(w, "--- Connections ---\n")
-	fmt.Fprintf(w, "Active:        %d\n", s.ActiveConns)
-	fmt.Fprintf(w, "Total:         %d\n", s.TotalConns)
-	fmt.Fprintf(w, "--- Health ---\n")
-	fmt.Fprintf(w, "Errors:        %d\n", s.Errors)
-	fmt.Fprintf(w, "Pool Allocs:   %d\n", s.PoolAllocs)
+	_, _ = fmt.Fprintf(w, "\n=== ChameleonNet Metrics ===\n")
+	_, _ = fmt.Fprintf(w, "Uptime:        %s\n", s.Uptime.Round(time.Second))
+	_, _ = fmt.Fprintf(w, "Time:          %s\n", s.Timestamp.Format("15:04:05"))
+	_, _ = fmt.Fprintf(w, "--- Traffic ---\n")
+	_, _ = fmt.Fprintf(w, "Bytes Up:      %s (%d pkts)\n", formatBytes(s.BytesUp), s.PacketsUp)
+	_, _ = fmt.Fprintf(w, "Bytes Down:    %s (%d pkts)\n", formatBytes(s.BytesDown), s.PacketsDown)
+	_, _ = fmt.Fprintf(w, "Chaff Sent:    %s (%d pkts)\n", formatBytes(s.ChaffSent), s.PacketsChaff)
+	_, _ = fmt.Fprintf(w, "Total:         %s (%d pkts)\n", formatBytes(s.BytesTotal), s.PacketsTotal)
+	_, _ = fmt.Fprintf(w, "--- Connections ---\n")
+	_, _ = fmt.Fprintf(w, "Active:        %d\n", s.ActiveConns)
+	_, _ = fmt.Fprintf(w, "Total:         %d\n", s.TotalConns)
+	_, _ = fmt.Fprintf(w, "--- Health ---\n")
+	_, _ = fmt.Fprintf(w, "Errors:        %d\n", s.Errors)
+	_, _ = fmt.Fprintf(w, "Pool Allocs:   %d\n", s.PoolAllocs)
 	if s.LatencyCount > 0 {
-		fmt.Fprintf(w, "Latency Mean:  %s (%d samples)\n",
+		_, _ = fmt.Fprintf(w, "Latency Mean:  %s (%d samples)\n",
 			time.Duration(s.LatencyMeanNs).Round(time.Microsecond), s.LatencyCount)
 	}
-	fmt.Fprintf(w, "============================\n")
+	_, _ = fmt.Fprintf(w, "============================\n")
 }
 
 func (m *ProxyMetrics) Reset() {
@@ -283,7 +283,14 @@ type MemMetrics struct {
 }
 
 func ReadMem() MemMetrics {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
 	return MemMetrics{
-		Goroutines: 0,
+		HeapInuse:    m.HeapInuse,
+		HeapAlloc:    m.HeapAlloc,
+		Sys:          m.Sys,
+		NumGC:        m.NumGC,
+		PauseTotalNs: m.PauseTotalNs,
+		Goroutines:   runtime.NumGoroutine(),
 	}
 }

@@ -3,6 +3,7 @@ package tunnel
 import (
 	"context"
 	"crypto/sha256"
+	"errors"
 	"io"
 	"net"
 	"sync"
@@ -42,7 +43,8 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				var ne net.Error
+				if errors.As(err, &ne) && ne.Timeout() {
 					time.Sleep(100 * time.Millisecond)
 					continue
 				}
@@ -51,13 +53,13 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		}
 
 		if tcp, ok := conn.(*net.TCPConn); ok {
-			tcp.SetNoDelay(true)
+			_ = tcp.SetNoDelay(true)
 		}
 
 		s.active.Add(1)
 		go func(tunnelConn net.Conn) {
 			defer s.active.Done()
-			s.handleConn(tunnelConn)
+			s.handleConn(ctx, tunnelConn)
 		}(conn)
 	}
 }
@@ -65,7 +67,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 func (s *Server) Shutdown(ctx context.Context) error {
 	close(s.closeCh)
 	if s.listener != nil {
-		s.listener.Close()
+		_ = s.listener.Close()
 	}
 
 	done := make(chan struct{})
@@ -82,18 +84,18 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	}
 }
 
-func (s *Server) handleConn(tunnel net.Conn) {
+func (s *Server) handleConn(ctx context.Context, tunnel net.Conn) {
 	defer tunnel.Close()
 
 	sc, err := s.handshake(tunnel)
 	if err != nil {
-		tunnel.Write([]byte{HandshakeErr})
+		_, _ = tunnel.Write([]byte{HandshakeErr})
 		return
 	}
 
 	targetAddr, err := sc.readTarget()
 	if err != nil {
-		tunnel.Write([]byte{HandshakeErr})
+		_, _ = tunnel.Write([]byte{HandshakeErr})
 		return
 	}
 
@@ -103,7 +105,7 @@ func (s *Server) handleConn(tunnel net.Conn) {
 			Type:    PacketReal,
 			Payload: []byte(err.Error()),
 		}
-		WritePacket(tunnel, respPkt, sc.enc)
+		_, _ = WritePacket(tunnel, respPkt, sc.enc)
 		return
 	}
 	defer target.Close()
@@ -116,7 +118,7 @@ func (s *Server) handleConn(tunnel net.Conn) {
 		return
 	}
 
-	sc.relayBidirectional(target)
+	sc.relayBidirectional(ctx, target)
 }
 
 func (s *Server) handshake(tunnel net.Conn) (*ServerConn, error) {
@@ -144,8 +146,8 @@ func (s *Server) handshake(tunnel net.Conn) (*ServerConn, error) {
 		serverSalt[i] ^= 0x02
 	}
 
-	clientKey, _ := crypto.DeriveKey(s.config.Passphrase, clientSalt, 1)
-	serverKey, _ := crypto.DeriveKey(s.config.Passphrase, serverSalt, 1)
+	clientKey := crypto.DeriveSubKey(s.config.Passphrase, clientSalt)
+	serverKey := crypto.DeriveSubKey(s.config.Passphrase, serverSalt)
 
 	serverSum := sha256.Sum256(serverSalt[:])
 	clientSum := sha256.Sum256(clientSalt[:])
@@ -177,7 +179,6 @@ type ServerConn struct {
 	dec     *crypto.Decryptor
 	config  *config.Config
 	writeMu sync.Mutex
-	readMu  sync.Mutex
 	closed  bool
 	closeMu sync.RWMutex
 }
@@ -195,39 +196,38 @@ func (sc *ServerConn) dialTarget(addr string) (net.Conn, error) {
 	return dialer.Dial("tcp", addr)
 }
 
-func (sc *ServerConn) relayBidirectional(target net.Conn) {
+func (sc *ServerConn) relayBidirectional(ctx context.Context, target net.Conn) {
 	var wg sync.WaitGroup
-	_, cancel := context.WithCancel(context.Background())
+	relayCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		if err := sc.readFromTunnelWriteToTarget(target); err != nil {
-			if !isClosedConnError(err) {
-			}
-		}
+		_ = sc.readFromTunnelWriteToTarget(relayCtx, target)
 	}()
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		if err := sc.readFromTargetWriteToTunnel(target); err != nil {
-			if !isClosedConnError(err) {
-			}
-		}
+		_ = sc.readFromTargetWriteToTunnel(relayCtx, target)
 	}()
 	wg.Wait()
 }
 
-func (sc *ServerConn) readFromTunnelWriteToTarget(target net.Conn) error {
+func (sc *ServerConn) readFromTunnelWriteToTarget(ctx context.Context, target net.Conn) error {
 	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 		if sc.config.ReadTimeout > 0 {
-			sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration()))
+			_ = sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration()))
 		}
 		pkt, err := ReadPacket(sc.tunnel, sc.dec)
 		if sc.config.ReadTimeout > 0 {
-			sc.tunnel.SetReadDeadline(time.Time{})
+			_ = sc.tunnel.SetReadDeadline(time.Time{})
 		}
 		if err != nil {
 			return err
@@ -243,9 +243,14 @@ func (sc *ServerConn) readFromTunnelWriteToTarget(target net.Conn) error {
 	}
 }
 
-func (sc *ServerConn) readFromTargetWriteToTunnel(target net.Conn) error {
+func (sc *ServerConn) readFromTargetWriteToTunnel(ctx context.Context, target net.Conn) error {
 	buf := make([]byte, 32768)
 	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 		n, err := target.Read(buf)
 		if n > 0 {
 			pkt := &PlainPacket{

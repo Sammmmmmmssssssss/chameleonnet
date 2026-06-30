@@ -1,0 +1,27 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - errcheck
+    - staticcheck
+    - unused
+  settings:
+    errcheck:
+      exclude-functions:
+        - (net.Conn).Close
+        - (net.Listener).Close
+        - (net.Conn).SetReadDeadline
+        - (net.Conn).SetWriteDeadline
+        - (net.Conn).SetDeadline
+        - (*net.TCPConn).SetNoDelay
+        - (*net.TCPConn).SetKeepAlive
+        - (*net.TCPConn).SetKeepAlivePeriod
+        - (*net.TCPConn).SetReadBuffer
+        - (*net.TCPConn).SetWriteBuffer
+        - io.Writer.Write
+        - io.Copy
+        - fmt.Fprintf
+        - os.Setenv
+issues:
+  exclude:
+    - path: _test\.go

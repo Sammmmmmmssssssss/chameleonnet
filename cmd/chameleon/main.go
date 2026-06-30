@@ -52,8 +52,7 @@ func main() {
 	bp := pool.NewBufferPool()
 	met := metrics.NewProxyMetrics()
 
-	if err := printVersionBanner(); err != nil {
-	}
+	_ = printVersionBanner()
 
 	var p proxy.Server
 	switch cfg.Mode {
@@ -109,12 +108,12 @@ func main() {
 	log.Println("ChameleonNet stopped")
 
 	snap := met.Snapshot()
-	fmt.Fprintf(os.Stderr, "\n=== Final Metrics ===\n")
-	fmt.Fprintf(os.Stderr, "Uptime:        %s\n", snap.Uptime.Round(time.Second))
-	fmt.Fprintf(os.Stderr, "Bytes Up:      %s\n", formatBytes(snap.BytesUp))
-	fmt.Fprintf(os.Stderr, "Bytes Down:    %s\n", formatBytes(snap.BytesDown))
-	fmt.Fprintf(os.Stderr, "Total Conn:    %d\n", snap.TotalConns)
-	fmt.Fprintf(os.Stderr, "=====================\n")
+	_, _ = fmt.Fprintf(os.Stderr, "\n=== Final Metrics ===\n")
+	_, _ = fmt.Fprintf(os.Stderr, "Uptime:        %s\n", snap.Uptime.Round(time.Second))
+	_, _ = fmt.Fprintf(os.Stderr, "Bytes Up:      %s\n", formatBytes(snap.BytesUp))
+	_, _ = fmt.Fprintf(os.Stderr, "Bytes Down:    %s\n", formatBytes(snap.BytesDown))
+	_, _ = fmt.Fprintf(os.Stderr, "Total Conn:    %d\n", snap.TotalConns)
+	_, _ = fmt.Fprintf(os.Stderr, "=====================\n")
 }
 
 func metricsLoop(ctx context.Context, cfg *config.Config, met *metrics.ProxyMetrics, bp *pool.BufferPool) {

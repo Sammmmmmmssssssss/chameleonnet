@@ -217,15 +217,15 @@ func TestAESCTRStream(t *testing.T) {
 	buf1 := make([]byte, 64)
 	buf2 := make([]byte, 64)
 
-	s1.Read(buf1)
-	s2.Read(buf2)
+	_, _ = s1.Read(buf1)
+	_, _ = s2.Read(buf2)
 
 	if !bytes.Equal(buf1, buf2) {
 		t.Error("two CTR streams with same key+IV produced different output")
 	}
 
 	buf3 := make([]byte, 64)
-	s1.Read(buf3)
+	_, _ = s1.Read(buf3)
 	if bytes.Equal(buf1, buf3) {
 		t.Error("CTR stream produced same output for different positions")
 	}
@@ -244,8 +244,8 @@ func TestDeterministicRNG(t *testing.T) {
 	buf1 := make([]byte, 32)
 	buf2 := make([]byte, 32)
 
-	rng1.Read(buf1)
-	rng2.Read(buf2)
+	_, _ = rng1.Read(buf1)
+	_, _ = rng2.Read(buf2)
 
 	if !bytes.Equal(buf1, buf2) {
 		t.Error("two RNGs with same seed produced different output")
@@ -259,8 +259,8 @@ func TestDeterministicRNGDifferentSeeds(t *testing.T) {
 	buf1 := make([]byte, 32)
 	buf2 := make([]byte, 32)
 
-	rng1.Read(buf1)
-	rng2.Read(buf2)
+	_, _ = rng1.Read(buf1)
+	_, _ = rng2.Read(buf2)
 
 	if bytes.Equal(buf1, buf2) {
 		t.Error("different seeds should produce different output")
@@ -377,7 +377,7 @@ func BenchmarkEncrypt(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		enc.Encrypt(plaintext)
+		_, _ = enc.Encrypt(plaintext)
 	}
 }
 
@@ -393,7 +393,7 @@ func BenchmarkDecrypt(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		dec.Decrypt(ciphertext)
+		_, _ = dec.Decrypt(ciphertext)
 	}
 }
 
@@ -404,6 +404,6 @@ func BenchmarkKeyDerivation(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		DeriveKey("test-password-16ch-test-password-16ch", salt, 100000)
+		_, _ = DeriveKey("test-password-16ch-test-password-16ch", salt, 100000)
 	}
 }

@@ -134,7 +134,7 @@ func TestDetectAndRemoveChaff(t *testing.T) {
 		t.Error("data should be nil for chaff")
 	}
 
-	data, isChaff = p.detectAndRemoveChaff([]byte("real data"))
+	_, isChaff = p.detectAndRemoveChaff([]byte("real data"))
 	if isChaff {
 		t.Error("non-zero data should not be chaff")
 	}

@@ -24,8 +24,8 @@ func BenchmarkWriteReadPacket(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		WritePacket(&buf, pkt, enc)
-		ReadPacket(&buf, dec)
+		_, _ = WritePacket(&buf, pkt, enc)
+		_, _ = ReadPacket(&buf, dec)
 	}
 }
 

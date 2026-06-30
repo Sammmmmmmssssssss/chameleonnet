@@ -80,10 +80,11 @@ func (p *Proxy) acceptLoop(ctx context.Context) {
 			case <-ctx.Done():
 				return
 			default:
-				if ne, ok := err.(net.Error); ok && ne.Temporary() {
-					time.Sleep(100 * time.Millisecond)
-					continue
-				}
+			var ne net.Error
+			if errors.As(err, &ne) && ne.Timeout() {
+				time.Sleep(100 * time.Millisecond)
+				continue
+			}
 				return
 			}
 		}
@@ -92,8 +93,8 @@ func (p *Proxy) acceptLoop(ctx context.Context) {
 			tcp.SetKeepAlive(true)
 			tcp.SetKeepAlivePeriod(30 * time.Second)
 			tcp.SetNoDelay(true)
-			tcp.SetReadBuffer(p.config.BufferSize)
-			tcp.SetWriteBuffer(p.config.BufferSize)
+			_ = tcp.SetReadBuffer(p.config.BufferSize)
+			_ = tcp.SetWriteBuffer(p.config.BufferSize)
 		}
 
 		p.metrics.ActiveConns.Inc()
@@ -163,7 +164,7 @@ func (p *Proxy) handleSOCKS5(ctx context.Context, conn net.Conn, br *bufio.Reade
 		p.metrics.Errors.Inc()
 		return
 	}
-	defer remote.Close()
+	_ = remote.Close()
 
 	if err := remote.Handshake(targetAddr); err != nil {
 		p.replySOCKS5Error(conn, 0x01)
@@ -189,7 +190,7 @@ func (p *Proxy) handleHTTP(ctx context.Context, conn net.Conn, br *bufio.Reader)
 		p.metrics.Errors.Inc()
 		return
 	}
-	defer remote.Close()
+	_ = remote.Close()
 
 	if err := remote.Handshake(targetAddr); err != nil {
 		writeHTTPStatus(conn, 502, "Bad Gateway")
@@ -236,13 +237,13 @@ func negotiateSOCKS5(conn net.Conn, br *bufio.Reader) (string, error) {
 		return "", err
 	}
 	if greeting[0] != 0x05 {
-		conn.Write([]byte{0x05, 0xFF})
+		_, _ = conn.Write([]byte{0x05, 0xFF})
 		return "", ErrInvalidGreeting
 	}
 
 	nMethods := int(greeting[1])
 	if nMethods < 1 || nMethods > 255 {
-		conn.Write([]byte{0x05, 0xFF})
+		_, _ = conn.Write([]byte{0x05, 0xFF})
 		return "", ErrInvalidGreeting
 	}
 
@@ -251,7 +252,7 @@ func negotiateSOCKS5(conn net.Conn, br *bufio.Reader) (string, error) {
 		return "", ErrInvalidGreeting
 	}
 
-	conn.Write([]byte{0x05, 0x00})
+	_, _ = conn.Write([]byte{0x05, 0x00})
 
 	request := make([]byte, 4)
 	if _, err := io.ReadFull(br, request); err != nil {
@@ -259,7 +260,7 @@ func negotiateSOCKS5(conn net.Conn, br *bufio.Reader) (string, error) {
 	}
 
 	if request[1] != 0x01 {
-		conn.Write([]byte{0x05, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+		_, _ = conn.Write([]byte{0x05, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		return "", ErrUnsupportedCommand
 	}
 
@@ -295,7 +296,7 @@ func negotiateSOCKS5(conn net.Conn, br *bufio.Reader) (string, error) {
 		}
 		addr = "[" + net.IP(b).String() + "]"
 	default:
-		conn.Write([]byte{0x05, 0x08, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+		_, _ = conn.Write([]byte{0x05, 0x08, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		return "", ErrUnsupportedAddrType
 	}
 
@@ -309,11 +310,11 @@ func negotiateSOCKS5(conn net.Conn, br *bufio.Reader) (string, error) {
 }
 
 func (p *Proxy) replySOCKS5Success(conn net.Conn) {
-	conn.Write([]byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+	_, _ = conn.Write([]byte{0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 }
 
 func (p *Proxy) replySOCKS5Error(conn net.Conn, rep byte) {
-	conn.Write([]byte{0x05, rep, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+	_, _ = conn.Write([]byte{0x05, rep, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 }
 
 func parseHTTPConnect(br *bufio.Reader) (string, error) {
@@ -370,11 +371,11 @@ func trimCRLF(s string) string {
 }
 
 func writeHTTPStatus(conn net.Conn, code int, msg string) {
-	fmt.Fprintf(conn, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", code, msg)
+	_, _ = fmt.Fprintf(conn, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", code, msg)
 }
 
 func writeHTTP200(conn net.Conn) {
-	conn.Write([]byte("HTTP/1.1 200 Connection Established\r\n\r\n"))
+	_, _ = conn.Write([]byte("HTTP/1.1 200 Connection Established\r\n\r\n"))
 }
 
 func formatPort(n int) string {

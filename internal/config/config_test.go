@@ -82,8 +82,8 @@ func TestDurationUnmarshal(t *testing.T) {
 
 func TestLoadDefaults(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("CHAMELEON_PASSPHRASE", "test-password-16ch")
-	os.Setenv("CHAMELEON_TARGET", "relay.example.com:9000")
+_ = os.Setenv("CHAMELEON_PASSPHRASE", "test-password-16ch")
+_ = os.Setenv("CHAMELEON_TARGET", "relay.example.com:9000")
 
 	cfg, err := Load()
 	if err != nil {
@@ -118,7 +118,7 @@ func TestLoadDefaults(t *testing.T) {
 
 func TestLoadEnvOverride(t *testing.T) {
 	os.Clearenv()
-	os.Setenv("CHAMELEON_PASSPHRASE", "test-password-16ch")
+_ = os.Setenv("CHAMELEON_PASSPHRASE", "test-password-16ch")
 	os.Setenv("CHAMELEON_TARGET", "relay.example.com:9000")
 	os.Setenv("CHAMELEON_LISTEN", "0.0.0.0:2080")
 	os.Setenv("CHAMELEON_MODE", "server")

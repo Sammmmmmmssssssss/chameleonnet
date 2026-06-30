@@ -36,24 +36,24 @@ func Dial(ctx context.Context, remoteAddr string, cfg *config.Config) (*ClientCo
 	}
 
 	if tcp, ok := relay.(*net.TCPConn); ok {
-		tcp.SetNoDelay(true)
+		_ = tcp.SetNoDelay(true)
 	}
 
 	salt, err := crypto.RandomSalt()
 	if err != nil {
-		relay.Close()
+		_ = relay.Close()
 		return nil, err
 	}
 
 	handshakeMsg := NewHandshakeMessage(salt)
 	if _, err := relay.Write(handshakeMsg.Marshal()); err != nil {
-		relay.Close()
+		_ = relay.Close()
 		return nil, err
 	}
 
 	reply := make([]byte, 1)
 	if _, err := io.ReadFull(relay, reply); err != nil {
-		relay.Close()
+		_ = relay.Close()
 		return nil, err
 	}
 	var resp HandshakeResponse
@@ -77,8 +77,8 @@ func Dial(ctx context.Context, remoteAddr string, cfg *config.Config) (*ClientCo
 		serverSalt[i] ^= 0x02
 	}
 
-	clientKey, _ := crypto.DeriveKey(cfg.Passphrase, clientSalt, 1)
-	serverKey, _ := crypto.DeriveKey(cfg.Passphrase, serverSalt, 1)
+	clientKey := crypto.DeriveSubKey(cfg.Passphrase, clientSalt)
+	serverKey := crypto.DeriveSubKey(cfg.Passphrase, serverSalt)
 
 	clientSum := sha256.Sum256(clientSalt[:])
 	serverSum := sha256.Sum256(serverSalt[:])
@@ -106,24 +106,24 @@ func (c *ClientConn) Handshake(targetAddr string) error {
 	}
 
 	if c.config.HandshakeTimeout > 0 {
-		c.relay.SetWriteDeadline(time.Now().Add(c.config.HandshakeTimeout.Duration()))
+		_ = c.relay.SetWriteDeadline(time.Now().Add(c.config.HandshakeTimeout.Duration()))
 	}
 	if _, err := WritePacket(c.relay, pkt, c.enc); err != nil {
 		return err
 	}
 	if c.config.HandshakeTimeout > 0 {
-		c.relay.SetWriteDeadline(time.Time{})
+		_ = c.relay.SetWriteDeadline(time.Time{})
 	}
 
 	if c.config.HandshakeTimeout > 0 {
-		c.relay.SetReadDeadline(time.Now().Add(c.config.HandshakeTimeout.Duration()))
+		_ = c.relay.SetReadDeadline(time.Now().Add(c.config.HandshakeTimeout.Duration()))
 	}
 	respPkt, err := ReadPacket(c.relay, c.dec)
 	if err != nil {
 		return err
 	}
 	if c.config.HandshakeTimeout > 0 {
-		c.relay.SetReadDeadline(time.Time{})
+		_ = c.relay.SetReadDeadline(time.Time{})
 	}
 
 	if respPkt.Type != PacketReal {
@@ -134,7 +134,7 @@ func (c *ClientConn) Handshake(targetAddr string) error {
 }
 
 func (c *ClientConn) Relay(ctx context.Context, local net.Conn) error {
-	ctx, cancel := context.WithCancel(ctx)
+	relayCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	var wg sync.WaitGroup
@@ -154,7 +154,7 @@ func (c *ClientConn) Relay(ctx context.Context, local net.Conn) error {
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		err := c.relayFromLocal(local)
+		err := c.relayFromLocal(relayCtx, local)
 		if err != nil && !isClosedConnError(err) {
 			setRelayErr(err)
 		}
@@ -162,7 +162,7 @@ func (c *ClientConn) Relay(ctx context.Context, local net.Conn) error {
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		err := c.relayToLocal(local)
+		err := c.relayToLocal(relayCtx, local)
 		if err != nil && !isClosedConnError(err) {
 			setRelayErr(err)
 		}
@@ -175,9 +175,14 @@ func (c *ClientConn) Relay(ctx context.Context, local net.Conn) error {
 	return err
 }
 
-func (c *ClientConn) relayFromLocal(local net.Conn) error {
+func (c *ClientConn) relayFromLocal(ctx context.Context, local net.Conn) error {
 	buf := make([]byte, 32768)
 	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 		n, err := local.Read(buf)
 		if n > 0 {
 			pkt := &PlainPacket{
@@ -189,7 +194,7 @@ func (c *ClientConn) relayFromLocal(local net.Conn) error {
 			c.writeMu.Lock()
 			writeErr := func() error {
 				if c.config.WriteTimeout > 0 {
-					c.relay.SetWriteDeadline(time.Now().Add(c.config.WriteTimeout.Duration()))
+					_ = c.relay.SetWriteDeadline(time.Now().Add(c.config.WriteTimeout.Duration()))
 				}
 				_, err := WritePacket(c.relay, pkt, c.enc)
 				if c.config.WriteTimeout > 0 {
@@ -212,10 +217,15 @@ func (c *ClientConn) relayFromLocal(local net.Conn) error {
 	}
 }
 
-func (c *ClientConn) relayToLocal(local net.Conn) error {
+func (c *ClientConn) relayToLocal(ctx context.Context, local net.Conn) error {
 	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
 		if c.config.ReadTimeout > 0 {
-			c.relay.SetReadDeadline(time.Now().Add(c.config.ReadTimeout.Duration()))
+			_ = c.relay.SetReadDeadline(time.Now().Add(c.config.ReadTimeout.Duration()))
 		}
 		pkt, err := ReadPacket(c.relay, c.dec)
 		if c.config.ReadTimeout > 0 {

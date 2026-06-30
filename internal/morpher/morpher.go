@@ -13,25 +13,6 @@ type PacketBufferPool interface {
 	Put(buf []byte)
 }
 
-type slicePoolAdapter struct {
-	pool interface {
-		Get(size int) *[]byte
-		Put(buf *[]byte)
-	}
-}
-
-func (a *slicePoolAdapter) Get(size int) []byte {
-	buf := a.pool.Get(size)
-	if buf == nil {
-		return make([]byte, size)
-	}
-	return *buf
-}
-
-func (a *slicePoolAdapter) Put(buf []byte) {
-	return
-}
-
 type MorphPipeline struct {
 	shaper   *Shaper
 	chaff    *ChaffInjector

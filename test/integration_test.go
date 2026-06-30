@@ -24,7 +24,7 @@ func startEchoServer(ctx context.Context) (net.Addr, error) {
 	}
 	go func() {
 		<-ctx.Done()
-		listener.Close()
+		_ = listener.Close()
 	}()
 	go func() {
 		for {
@@ -34,7 +34,7 @@ func startEchoServer(ctx context.Context) (net.Addr, error) {
 			}
 			go func(c net.Conn) {
 				defer c.Close()
-				io.Copy(c, c)
+				_, _ = io.Copy(c, c)
 			}(conn)
 		}
 	}()
@@ -51,7 +51,7 @@ func startRelayServer(ctx context.Context, cfg *config.Config) (net.Addr, error)
 
 	go func() {
 		<-ctx.Done()
-		listener.Close()
+		_ = listener.Close()
 	}()
 	go func() {
 		for {
@@ -69,21 +69,21 @@ func startRelayServer(ctx context.Context, cfg *config.Config) (net.Addr, error)
 }
 
 func handleRelayConn(conn net.Conn) {
-	conn.SetReadDeadline(time.Now().Add(10 * time.Second))
+	_ = conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 
 	buf := make([]byte, tunnel.MagicLength+1+crypto.SaltSize)
 	if _, err := io.ReadFull(conn, buf); err != nil {
-		conn.Write([]byte{tunnel.HandshakeErr})
+		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
 		return
 	}
 	var msg tunnel.HandshakeMessage
 	if err := msg.Unmarshal(buf); err != nil {
-		conn.Write([]byte{tunnel.HandshakeErr})
+		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
 		return
 	}
 	_, fullKeyErr := crypto.DeriveKey(testPassphrase, msg.Salt, 100000)
 	if fullKeyErr != nil {
-		conn.Write([]byte{tunnel.HandshakeErr})
+		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
 		return
 	}
 
@@ -96,8 +96,8 @@ func handleRelayConn(conn net.Conn) {
 		serverSalt[i] ^= 0x02
 	}
 
-	clientKey, _ := crypto.DeriveKey(testPassphrase, clientSalt, 1)
-	serverKey, _ := crypto.DeriveKey(testPassphrase, serverSalt, 1)
+	clientKey := crypto.DeriveSubKey(testPassphrase, clientSalt)
+	serverKey := crypto.DeriveSubKey(testPassphrase, serverSalt)
 
 	clientSum := sha256.Sum256(clientSalt[:])
 	serverSum := sha256.Sum256(serverSalt[:])
@@ -135,7 +135,7 @@ func handleRelayConn(conn net.Conn) {
 		return
 	}
 
-	_, cancel := context.WithCancel(context.Background())
+	relayCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	var rwg sync.WaitGroup
@@ -145,6 +145,11 @@ func handleRelayConn(conn net.Conn) {
 		defer cancel()
 		buf := make([]byte, 32768)
 		for {
+			select {
+			case <-relayCtx.Done():
+				return
+			default:
+			}
 			n, err := target.Read(buf)
 			if n > 0 {
 				pkt := &tunnel.PlainPacket{
@@ -152,7 +157,9 @@ func handleRelayConn(conn net.Conn) {
 					Payload: make([]byte, n),
 				}
 				copy(pkt.Payload, buf[:n])
-				tunnel.WritePacket(conn, pkt, enc)
+				if _, err := tunnel.WritePacket(conn, pkt, enc); err != nil {
+					return
+				}
 			}
 			if err != nil {
 				return
@@ -163,6 +170,11 @@ func handleRelayConn(conn net.Conn) {
 		defer rwg.Done()
 		defer cancel()
 		for {
+			select {
+			case <-relayCtx.Done():
+				return
+			default:
+			}
 			pkt, err := tunnel.ReadPacket(conn, dec)
 			if err != nil {
 				return
@@ -195,7 +207,7 @@ func dialClient(ctx context.Context, relayAddr string) (*testClient, error) {
 
 	salt, err := crypto.RandomSalt()
 	if err != nil {
-		conn.Close()
+		_ = conn.Close()
 		return nil, err
 	}
 
@@ -235,8 +247,8 @@ func dialClient(ctx context.Context, relayAddr string) (*testClient, error) {
 		serverSalt[i] ^= 0x02
 	}
 
-	clientKey, _ := crypto.DeriveKey(testPassphrase, clientSalt, 1)
-	serverKey, _ := crypto.DeriveKey(testPassphrase, serverSalt, 1)
+	clientKey := crypto.DeriveSubKey(testPassphrase, clientSalt)
+	serverKey := crypto.DeriveSubKey(testPassphrase, serverSalt)
 
 	clientSum := sha256.Sum256(clientSalt[:])
 	serverSum := sha256.Sum256(serverSalt[:])
