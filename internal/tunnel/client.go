@@ -292,6 +292,19 @@ func (c *ClientConn) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
+// WriteChaff sends a single chaff (decoy) packet into the encrypted tunnel.
+// The remote server will discard it; it exists solely to confuse traffic analysis.
+func (c *ClientConn) WriteChaff(payload []byte) error {
+	pkt := &PlainPacket{
+		Type:    PacketChaff,
+		Payload: payload,
+	}
+	c.writeMu.Lock()
+	_, err := WritePacket(c.relay, pkt, c.enc)
+	c.writeMu.Unlock()
+	return err
+}
+
 func (c *ClientConn) SetDeadline(t time.Time) error {
 	return c.relay.SetDeadline(t)
 }

@@ -189,8 +189,9 @@ func TestParseHTTPConnectInvalidFormat(t *testing.T) {
 
 func TestNewProxy(t *testing.T) {
 	cfg := &config.Config{
-		ListenAddr: "127.0.0.1:0",
-		Mode:       config.ModeClient,
+		ListenAddr:     "127.0.0.1:0",
+		Mode:           config.ModeClient,
+		MaxConnections: 10,
 	}
 	bp := pool.NewBufferPool()
 	met := metrics.NewProxyMetrics()
@@ -200,6 +201,9 @@ func TestNewProxy(t *testing.T) {
 	}
 	if p.config != cfg {
 		t.Errorf("config not set correctly")
+	}
+	if cap(p.connSem) != 10 {
+		t.Errorf("connSem capacity = %d, want 10", cap(p.connSem))
 	}
 }
 
