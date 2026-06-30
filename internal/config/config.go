@@ -1,13 +1,17 @@
 package config
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var ConfigPath string
 
 type ProxyMode int
 
@@ -144,24 +148,25 @@ func (s ShaperConfig) Validate() error {
 }
 
 type Config struct {
-	ListenAddr     string
-	RemoteAddr     string
-	Mode           ProxyMode
-	Passphrase     string
-	Profile        ProfileName
-	ChaffLambda    float64
-	ChaffRatio     float64
-	MinShapeDelay  Duration
-	MaxShapeDelay  Duration
-	MaxConnections int
-	BufferSize     int
-	KDFIterations  int
-	ReadTimeout    Duration
-	WriteTimeout   Duration
-	HandshakeTimeout Duration
-	IdleTimeout    Duration
-	ShaperClient   ShaperConfig
-	ShaperServer   ShaperConfig
+	ListenAddr       string        `json:"listen_addr,omitempty"`
+	RemoteAddr       string        `json:"remote_addr,omitempty"`
+	Mode             ProxyMode     `json:"-"`
+	ModeStr          string        `json:"mode,omitempty"`
+	Passphrase       string        `json:"passphrase,omitempty"`
+	Profile          ProfileName   `json:"profile,omitempty"`
+	ChaffLambda      float64       `json:"chaff_lambda,omitempty"`
+	ChaffRatio       float64       `json:"chaff_ratio,omitempty"`
+	MinShapeDelay    Duration      `json:"min_shape_delay,omitempty"`
+	MaxShapeDelay    Duration      `json:"max_shape_delay,omitempty"`
+	MaxConnections   int           `json:"max_connections,omitempty"`
+	BufferSize       int           `json:"buffer_size,omitempty"`
+	KDFIterations    int           `json:"kdf_iterations,omitempty"`
+	ReadTimeout      Duration      `json:"read_timeout,omitempty"`
+	WriteTimeout     Duration      `json:"write_timeout,omitempty"`
+	HandshakeTimeout Duration      `json:"handshake_timeout,omitempty"`
+	IdleTimeout      Duration      `json:"idle_timeout,omitempty"`
+	ShaperClient     ShaperConfig  `json:"shaper_client,omitempty"`
+	ShaperServer     ShaperConfig  `json:"shaper_server,omitempty"`
 }
 
 func getEnv(key, fallback string) string {
@@ -284,25 +289,108 @@ func DefaultChaffRatio(profile ProfileName) float64 {
 	}
 }
 
+func loadFromFile(path string) (*Config, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("config file: %w", err)
+	}
+	cfg := &Config{}
+	if err := json.Unmarshal(data, cfg); err != nil {
+		return nil, fmt.Errorf("config file: %w", err)
+	}
+	if cfg.ModeStr != "" {
+		m, err := ParseProxyMode(cfg.ModeStr)
+		if err != nil {
+			return nil, err
+		}
+		cfg.Mode = m
+	}
+	return cfg, nil
+}
+
 func Load() (*Config, error) {
 	cfg := &Config{
-		ListenAddr:     getEnv(envListenAddr, "127.0.0.1:1080"),
-		RemoteAddr:     getEnv(envRemoteAddr, ""),
+		ListenAddr:     "127.0.0.1:1080",
 		Mode:           ModeClient,
-		Passphrase:     getEnv(envPassphrase, ""),
 		Profile:        ProfileSpotify,
-		ChaffLambda:    0,
-		ChaffRatio:     0,
 		MinShapeDelay:  Duration(1 * time.Millisecond),
 		MaxShapeDelay:  Duration(500 * time.Millisecond),
-		MaxConnections: getEnvInt(envMaxConnections, 100),
-		BufferSize:     getEnvInt(envBufferSize, 32768),
-		KDFIterations:  getEnvInt(envKDFIterations, 100000),
+		MaxConnections: 100,
+		BufferSize:     32768,
+		KDFIterations:  100000,
 		ReadTimeout:    Duration(30 * time.Second),
 		WriteTimeout:   Duration(30 * time.Second),
 		HandshakeTimeout: Duration(10 * time.Second),
 		IdleTimeout:    Duration(300 * time.Second),
 	}
+
+	if ConfigPath != "" {
+		fileCfg, err := loadFromFile(ConfigPath)
+		if err != nil {
+			return nil, err
+		}
+		if fileCfg.ListenAddr != "" {
+			cfg.ListenAddr = fileCfg.ListenAddr
+		}
+		if fileCfg.RemoteAddr != "" {
+			cfg.RemoteAddr = fileCfg.RemoteAddr
+		}
+		if fileCfg.ModeStr != "" {
+			cfg.Mode = fileCfg.Mode
+		}
+		if fileCfg.Passphrase != "" {
+			cfg.Passphrase = fileCfg.Passphrase
+		}
+		if fileCfg.Profile != "" {
+			cfg.Profile = fileCfg.Profile
+		}
+		if fileCfg.ChaffLambda != 0 {
+			cfg.ChaffLambda = fileCfg.ChaffLambda
+		}
+		if fileCfg.ChaffRatio != 0 {
+			cfg.ChaffRatio = fileCfg.ChaffRatio
+		}
+		if fileCfg.MinShapeDelay != 0 {
+			cfg.MinShapeDelay = fileCfg.MinShapeDelay
+		}
+		if fileCfg.MaxShapeDelay != 0 {
+			cfg.MaxShapeDelay = fileCfg.MaxShapeDelay
+		}
+		if fileCfg.MaxConnections != 0 {
+			cfg.MaxConnections = fileCfg.MaxConnections
+		}
+		if fileCfg.BufferSize != 0 {
+			cfg.BufferSize = fileCfg.BufferSize
+		}
+		if fileCfg.KDFIterations != 0 {
+			cfg.KDFIterations = fileCfg.KDFIterations
+		}
+		if fileCfg.ReadTimeout != 0 {
+			cfg.ReadTimeout = fileCfg.ReadTimeout
+		}
+		if fileCfg.WriteTimeout != 0 {
+			cfg.WriteTimeout = fileCfg.WriteTimeout
+		}
+		if fileCfg.HandshakeTimeout != 0 {
+			cfg.HandshakeTimeout = fileCfg.HandshakeTimeout
+		}
+		if fileCfg.IdleTimeout != 0 {
+			cfg.IdleTimeout = fileCfg.IdleTimeout
+		}
+		if fileCfg.ShaperClient != (ShaperConfig{}) {
+			cfg.ShaperClient = fileCfg.ShaperClient
+		}
+		if fileCfg.ShaperServer != (ShaperConfig{}) {
+			cfg.ShaperServer = fileCfg.ShaperServer
+		}
+	}
+
+	cfg.ListenAddr = getEnv(envListenAddr, cfg.ListenAddr)
+	cfg.RemoteAddr = getEnv(envRemoteAddr, cfg.RemoteAddr)
+	cfg.Passphrase = getEnv(envPassphrase, cfg.Passphrase)
+	cfg.MaxConnections = getEnvInt(envMaxConnections, cfg.MaxConnections)
+	cfg.BufferSize = getEnvInt(envBufferSize, cfg.BufferSize)
+	cfg.KDFIterations = getEnvInt(envKDFIterations, cfg.KDFIterations)
 
 	if v := os.Getenv(envMode); v != "" {
 		m, err := ParseProxyMode(v)

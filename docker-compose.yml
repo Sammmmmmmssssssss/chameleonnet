@@ -1,0 +1,27 @@
+services:
+  relay:
+    build: .
+    container_name: chameleon-relay
+    ports:
+      - "10080:10080"
+    environment:
+      CHAMELEON_MODE: server
+      CHAMELEON_LISTEN: 0.0.0.0:10080
+      CHAMELEON_PASSPHRASE: "change-this-to-a-strong-passphrase"
+      CHAMELEON_PROFILE: generic
+    restart: unless-stopped
+
+  proxy:
+    build: .
+    container_name: chameleon-proxy
+    ports:
+      - "1080:1080"
+    environment:
+      CHAMELEON_MODE: client
+      CHAMELEON_LISTEN: 0.0.0.0:1080
+      CHAMELEON_TARGET: relay:10080
+      CHAMELEON_PASSPHRASE: "change-this-to-a-strong-passphrase"
+      CHAMELEON_PROFILE: generic
+    depends_on:
+      - relay
+    restart: unless-stopped

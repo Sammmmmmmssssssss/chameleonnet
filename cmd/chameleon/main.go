@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -22,6 +23,11 @@ var version = "0.1.0"
 
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+
+	configPath := flag.String("config", "", "Path to JSON config file")
+	flag.Parse()
+	config.ConfigPath = *configPath
+
 	log.Printf("ChameleonNet v%s starting (Go %s, %d CPUs)", version, runtime.Version(), runtime.NumCPU())
 
 	cfg, err := config.Load()
