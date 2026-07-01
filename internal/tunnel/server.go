@@ -36,7 +36,7 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		return err
 	}
 	s.listener = listener
-	defer listener.Close()
+	defer listener.Close() //nolint:errcheck
 
 	for {
 		conn, err := listener.Accept()
@@ -87,7 +87,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 func (s *Server) handleConn(ctx context.Context, tunnel net.Conn) {
-	defer tunnel.Close()
+	defer tunnel.Close() //nolint:errcheck
 
 	sc, err := s.handshake(tunnel)
 	if err != nil {
@@ -110,7 +110,7 @@ func (s *Server) handleConn(ctx context.Context, tunnel net.Conn) {
 		_, _ = WritePacket(tunnel, respPkt, sc.enc)
 		return
 	}
-	defer target.Close()
+	defer target.Close() //nolint:errcheck
 
 	respPkt := &PlainPacket{
 		Type:    PacketReal,
@@ -287,11 +287,11 @@ func (sc *ServerConn) relayBidirectional(ctx context.Context, target net.Conn) {
 			default:
 			}
 			if sc.config.ReadTimeout > 0 {
-				_ = sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration()))
+				_ = sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration())) //nolint:errcheck
 			}
 			pkt, err := ReadPacket(sc.tunnel, sc.dec)
 			if sc.config.ReadTimeout > 0 {
-				_ = sc.tunnel.SetReadDeadline(time.Time{})
+				_ = sc.tunnel.SetReadDeadline(time.Time{}) //nolint:errcheck
 			}
 
 			if err != nil {

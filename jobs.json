@@ -1,0 +1,962 @@
+{
+  "total_count": 11,
+  "jobs": [
+    {
+      "id": 84622808086,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUFg",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808086",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808086",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:22Z",
+      "name": "Build (windows/amd64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:05Z",
+          "completed_at": "2026-07-01T19:47:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:07Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:14Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:14Z",
+          "completed_at": "2026-07-01T19:47:20Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:20Z",
+          "completed_at": "2026-07-01T19:47:20Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:20Z",
+          "completed_at": "2026-07-01T19:47:20Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:20Z",
+          "completed_at": "2026-07-01T19:47:21Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:21Z",
+          "completed_at": "2026-07-01T19:47:21Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808086",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000096,
+      "runner_name": "GitHub Actions 1000000096",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808093,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUHQ",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808093",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808093",
+      "status": "completed",
+      "conclusion": "failure",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:18Z",
+      "name": "Lint",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:05Z",
+          "completed_at": "2026-07-01T19:47:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:06Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:14Z"
+        },
+        {
+          "name": "golangci-lint",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:14Z",
+          "completed_at": "2026-07-01T19:47:15Z"
+        },
+        {
+          "name": "Post golangci-lint",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-01T19:47:15Z",
+          "completed_at": "2026-07-01T19:47:16Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-07-01T19:47:16Z",
+          "completed_at": "2026-07-01T19:47:16Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-07-01T19:47:16Z",
+          "completed_at": "2026-07-01T19:47:16Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:16Z",
+          "completed_at": "2026-07-01T19:47:16Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808093",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000097,
+      "runner_name": "GitHub Actions 1000000097",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808098,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUIg",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808098",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808098",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:38Z",
+      "name": "Test (ubuntu-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:05Z",
+          "completed_at": "2026-07-01T19:47:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:06Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:14Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:14Z",
+          "completed_at": "2026-07-01T19:47:19Z"
+        },
+        {
+          "name": "Vet",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:19Z",
+          "completed_at": "2026-07-01T19:47:21Z"
+        },
+        {
+          "name": "Test (race)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-01T19:47:21Z",
+          "completed_at": "2026-07-01T19:47:36Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:36Z",
+          "completed_at": "2026-07-01T19:47:37Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-07-01T19:47:37Z",
+          "completed_at": "2026-07-01T19:47:37Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-07-01T19:47:37Z",
+          "completed_at": "2026-07-01T19:47:37Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808098",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000100,
+      "runner_name": "GitHub Actions 1000000100",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808100,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUJA",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808100",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808100",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:27Z",
+      "name": "Build (darwin/arm64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:07Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:08Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:08Z",
+          "completed_at": "2026-07-01T19:47:18Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:18Z",
+          "completed_at": "2026-07-01T19:47:23Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:23Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808100",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000101,
+      "runner_name": "GitHub Actions 1000000101",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808109,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mULQ",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808109",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808109",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:26Z",
+      "name": "Build (darwin/amd64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:07Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:09Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:09Z",
+          "completed_at": "2026-07-01T19:47:18Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:18Z",
+          "completed_at": "2026-07-01T19:47:23Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:23Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808109",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000099,
+      "runner_name": "GitHub Actions 1000000099",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808113,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUMQ",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808113",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808113",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:47:28Z",
+      "name": "Benchmark",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:07Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:08Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:08Z",
+          "completed_at": "2026-07-01T19:47:17Z"
+        },
+        {
+          "name": "Run benchmarks",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:17Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808113",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000098,
+      "runner_name": "GitHub Actions 1000000098",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808124,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUPA",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808124",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808124",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:06Z",
+      "completed_at": "2026-07-01T19:47:31Z",
+      "name": "Build (linux/amd64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:08Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:08Z",
+          "completed_at": "2026-07-01T19:47:09Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:09Z",
+          "completed_at": "2026-07-01T19:47:20Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:20Z",
+          "completed_at": "2026-07-01T19:47:26Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:26Z",
+          "completed_at": "2026-07-01T19:47:28Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:28Z",
+          "completed_at": "2026-07-01T19:47:28Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:28Z",
+          "completed_at": "2026-07-01T19:47:28Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:28Z",
+          "completed_at": "2026-07-01T19:47:28Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808124",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000103,
+      "runner_name": "GitHub Actions 1000000103",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808128,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUQA",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808128",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808128",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:06Z",
+      "completed_at": "2026-07-01T19:47:27Z",
+      "name": "Build (linux/arm64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:08Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:08Z",
+          "completed_at": "2026-07-01T19:47:09Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:09Z",
+          "completed_at": "2026-07-01T19:47:17Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:17Z",
+          "completed_at": "2026-07-01T19:47:22Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:22Z",
+          "completed_at": "2026-07-01T19:47:23Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:23Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:24Z",
+          "completed_at": "2026-07-01T19:47:24Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808128",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000104,
+      "runner_name": "GitHub Actions 1000000104",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808132,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mURA",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808132",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808132",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:05Z",
+      "completed_at": "2026-07-01T19:48:07Z",
+      "name": "Test (macos-latest)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:06Z",
+          "completed_at": "2026-07-01T19:47:10Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:10Z",
+          "completed_at": "2026-07-01T19:47:12Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:12Z",
+          "completed_at": "2026-07-01T19:47:33Z"
+        },
+        {
+          "name": "Build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:33Z",
+          "completed_at": "2026-07-01T19:47:40Z"
+        },
+        {
+          "name": "Vet",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:40Z",
+          "completed_at": "2026-07-01T19:47:42Z"
+        },
+        {
+          "name": "Test (race)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-07-01T19:47:42Z",
+          "completed_at": "2026-07-01T19:48:02Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:48:02Z",
+          "completed_at": "2026-07-01T19:48:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-07-01T19:48:02Z",
+          "completed_at": "2026-07-01T19:48:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-07-01T19:48:03Z",
+          "completed_at": "2026-07-01T19:48:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808132",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000000102,
+      "runner_name": "GitHub Actions 1000000102",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84622808174,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-mUbg",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84622808174",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84622808174",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-07-01T19:47:02Z",
+      "started_at": "2026-07-01T19:47:06Z",
+      "completed_at": "2026-07-01T19:47:28Z",
+      "name": "Build (windows/arm64)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-07-01T19:47:07Z",
+          "completed_at": "2026-07-01T19:47:08Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-07-01T19:47:08Z",
+          "completed_at": "2026-07-01T19:47:09Z"
+        },
+        {
+          "name": "Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-07-01T19:47:09Z",
+          "completed_at": "2026-07-01T19:47:18Z"
+        },
+        {
+          "name": "Cross-compile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-07-01T19:47:18Z",
+          "completed_at": "2026-07-01T19:47:23Z"
+        },
+        {
+          "name": "Upload artifact",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-07-01T19:47:23Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-07-01T19:47:25Z",
+          "completed_at": "2026-07-01T19:47:25Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84622808174",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000105,
+      "runner_name": "GitHub Actions 1000000105",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 84623008812,
+      "run_id": 28543468932,
+      "workflow_name": "Go",
+      "head_branch": "v0.2.0",
+      "run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOTJ4KJ88AAAATs-ykLA",
+      "head_sha": "d1d364c34f0c367d215d106b904368f8f804cb85",
+      "url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/actions/jobs/84623008812",
+      "html_url": "https://github.com/Sammmmmmmssssssss/chameleonnet/actions/runs/28543468932/job/84623008812",
+      "status": "completed",
+      "conclusion": "skipped",
+      "created_at": "2026-07-01T19:48:08Z",
+      "started_at": "2026-07-01T19:48:08Z",
+      "completed_at": "2026-07-01T19:48:07Z",
+      "name": "Release",
+      "steps": [
+
+      ],
+      "check_run_url": "https://api.github.com/repos/Sammmmmmmssssssss/chameleonnet/check-runs/84623008812",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": null,
+      "runner_name": null,
+      "runner_group_id": null,
+      "runner_group_name": null
+    }
+  ]
+}

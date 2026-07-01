@@ -87,7 +87,7 @@ func (p *Proxy) ListenAndServe(ctx context.Context) error {
 	go p.acceptLoop(ctx)
 
 	<-ctx.Done()
-	p.listener.Close()
+	_ = p.listener.Close() //nolint:errcheck
 	return nil
 }
 
@@ -134,7 +134,7 @@ func (p *Proxy) acceptLoop(ctx context.Context) {
 		p.wg.Add(1)
 		go func(c net.Conn) {
 			defer p.wg.Done()
-			defer c.Close()
+			defer c.Close() //nolint:errcheck
 			defer p.metrics.ActiveConns.Dec()
 			defer func() { p.connSem <- struct{}{} }() // release slot
 			p.handleConn(ctx, c)

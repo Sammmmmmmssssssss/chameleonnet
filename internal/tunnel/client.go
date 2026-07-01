@@ -41,44 +41,44 @@ func Dial(ctx context.Context, remoteAddr string, cfg *config.Config) (*ClientCo
 
 	salt, err := crypto.RandomSalt()
 	if err != nil {
-		_ = relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, err
 	}
 
 	handshakeMsg := NewHandshakeMessage(salt)
 	if _, err := relay.Write(handshakeMsg.Marshal()); err != nil {
-		_ = relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, err
 	}
 
 	// Read FakeTLSServerHello response
 	header := make([]byte, 5)
 	if _, err := io.ReadFull(relay, header); err != nil {
-		_ = relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, err
 	}
 	recordLen := int(header[3])<<8 | int(header[4])
 	if recordLen > 8192 {
-		_ = relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, errors.New("invalid TLS record length")
 	}
 	
 	payload := make([]byte, recordLen)
 	if _, err := io.ReadFull(relay, payload); err != nil {
-		_ = relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, err
 	}
 	
 	fullRecord := append(header, payload...)
 	var resp FakeTLSServerHello
 	if err := resp.Unmarshal(fullRecord); err != nil {
-		relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, err
 	}
 
 	_, deriveErr := crypto.DeriveKey(cfg.Passphrase, salt, cfg.KDFIterations)
 	if deriveErr != nil {
-		relay.Close()
+		_ = relay.Close() //nolint:errcheck
 		return nil, deriveErr
 	}
 
@@ -212,7 +212,7 @@ func (c *ClientConn) relayFromLocal(ctx context.Context, local net.Conn) error {
 				}
 				_, err := WritePacket(c.relay, pkt, c.enc)
 				if c.config.WriteTimeout > 0 {
-					c.relay.SetWriteDeadline(time.Time{})
+					_ = c.relay.SetWriteDeadline(time.Time{}) //nolint:errcheck
 				}
 				return err
 			}()
@@ -243,7 +243,7 @@ func (c *ClientConn) relayToLocal(ctx context.Context, local net.Conn) error {
 		}
 		pkt, err := ReadPacket(c.relay, c.dec)
 		if c.config.ReadTimeout > 0 {
-			c.relay.SetReadDeadline(time.Time{})
+			_ = c.relay.SetReadDeadline(time.Time{}) //nolint:errcheck
 		}
 
 		if err != nil {
