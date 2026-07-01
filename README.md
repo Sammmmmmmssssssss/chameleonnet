@@ -3,7 +3,7 @@
 [![Go Version](https://img.shields.io/github/go-mod/go-version/Sammmmmmmssssssss/chameleonnet)](https://golang.org/dl/)
 [![Build Status](https://github.com/Sammmmmmmssssssss/chameleonnet/actions/workflows/go.yml/badge.svg)](https://github.com/Sammmmmmmssssssss/chameleonnet/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Sammmmmmmssssssss/chameleonnet)](https://goreportcard.com/report/github.com/Sammmmmmmssssssss/chameleonnet)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **ChameleonNet** is a zero-dependency Go traffic morphing tunnel that defeats Deep Packet Inspection (DPI) by making encrypted traffic statistically indistinguishable from benign protocols. It combines a SOCKS5/HTTP CONNECT proxy with packet padding, chaff injection, and Poisson-distributed traffic shaping.
@@ -215,4 +215,4 @@ See [SECURITY.md](SECURITY.md) for the full security policy and responsible disc
 
 ## License
 
-MIT
+Apache 2.0
