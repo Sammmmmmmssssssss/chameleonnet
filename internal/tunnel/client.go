@@ -51,13 +51,27 @@ func Dial(ctx context.Context, remoteAddr string, cfg *config.Config) (*ClientCo
 		return nil, err
 	}
 
-	reply := make([]byte, 1)
-	if _, err := io.ReadFull(relay, reply); err != nil {
+	// Read FakeTLSServerHello response
+	header := make([]byte, 5)
+	if _, err := io.ReadFull(relay, header); err != nil {
 		_ = relay.Close()
 		return nil, err
 	}
-	var resp HandshakeResponse
-	if err := resp.Unmarshal(reply); err != nil {
+	recordLen := int(header[3])<<8 | int(header[4])
+	if recordLen > 8192 {
+		_ = relay.Close()
+		return nil, errors.New("invalid TLS record length")
+	}
+	
+	payload := make([]byte, recordLen)
+	if _, err := io.ReadFull(relay, payload); err != nil {
+		_ = relay.Close()
+		return nil, err
+	}
+	
+	fullRecord := append(header, payload...)
+	var resp FakeTLSServerHello
+	if err := resp.Unmarshal(fullRecord); err != nil {
 		relay.Close()
 		return nil, err
 	}

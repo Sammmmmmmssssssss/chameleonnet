@@ -71,13 +71,24 @@ func startRelayServer(ctx context.Context, cfg *config.Config) (net.Addr, error)
 func handleRelayConn(conn net.Conn) {
 	_ = conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 
-	buf := make([]byte, tunnel.MagicLength+1+crypto.SaltSize)
-	if _, err := io.ReadFull(conn, buf); err != nil {
+	header := make([]byte, 5)
+	if _, err := io.ReadFull(conn, header); err != nil {
 		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
 		return
 	}
-	var msg tunnel.HandshakeMessage
-	if err := msg.Unmarshal(buf); err != nil {
+	recordLen := int(header[3])<<8 | int(header[4])
+	if recordLen > 8192 {
+		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
+		return
+	}
+	payload := make([]byte, recordLen)
+	if _, err := io.ReadFull(conn, payload); err != nil {
+		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
+		return
+	}
+	fullRecord := append(header, payload...)
+	var msg tunnel.FakeTLSClientHello
+	if err := msg.Unmarshal(fullRecord); err != nil {
 		_, _ = conn.Write([]byte{tunnel.HandshakeErr})
 		return
 	}
@@ -110,7 +121,7 @@ func handleRelayConn(conn net.Conn) {
 	dec.SetNoncePrefix(clientPrefix)
 	enc.SetNoncePrefix(serverPrefix)
 
-	resp := tunnel.HandshakeResponse{Status: tunnel.HandshakeOK}
+	resp := tunnel.FakeTLSServerHello{Status: tunnel.HandshakeOK}
 	if _, err := conn.Write(resp.Marshal()); err != nil {
 		return
 	}
@@ -217,13 +228,24 @@ func dialClient(ctx context.Context, relayAddr string) (*testClient, error) {
 		return nil, err
 	}
 
-	reply := make([]byte, 1)
-	if _, err := io.ReadFull(conn, reply); err != nil {
+	header := make([]byte, 5)
+	if _, err := io.ReadFull(conn, header); err != nil {
 		conn.Close()
 		return nil, err
 	}
-	var hsResp tunnel.HandshakeResponse
-	if err := hsResp.Unmarshal(reply); err != nil {
+	recordLen := int(header[3])<<8 | int(header[4])
+	if recordLen > 8192 {
+		conn.Close()
+		return nil, io.ErrUnexpectedEOF
+	}
+	payload := make([]byte, recordLen)
+	if _, err := io.ReadFull(conn, payload); err != nil {
+		conn.Close()
+		return nil, err
+	}
+	fullRecord := append(header, payload...)
+	var hsResp tunnel.FakeTLSServerHello
+	if err := hsResp.Unmarshal(fullRecord); err != nil {
 		conn.Close()
 		return nil, err
 	}
@@ -374,7 +396,7 @@ func TestTunnelHandshakeErrors(t *testing.T) {
 	}
 	defer conn.Close()
 
-	garbage := make([]byte, tunnel.MagicLength+1+crypto.SaltSize)
+	garbage := make([]byte, 50)
 	for i := range garbage {
 		garbage[i] = 0xFF
 	}

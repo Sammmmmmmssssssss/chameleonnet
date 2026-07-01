@@ -9,7 +9,7 @@ import (
 
 const (
 	PacketMaxLength    = 65536
-	PacketHeaderLength = 4
+	PacketHeaderLength = 5
 	NonceLength        = crypto.NonceSize
 	TagLength          = crypto.TagSize
 	TypeLength         = 1
@@ -69,9 +69,14 @@ func WritePacket(w io.Writer, pkt *PlainPacket, enc *crypto.Encryptor) (int, err
 	totalLen := PacketHeaderLength + bodyLen
 
 	buf := make([]byte, totalLen)
-	binary.BigEndian.PutUint32(buf[0:4], uint32(bodyLen))
-	copy(buf[4:4+NonceLength], nonce[:])
-	copy(buf[4+NonceLength:], ciphertext)
+	// TLS Application Data (0x17), Version TLS 1.2 (0x03, 0x03)
+	buf[0] = 0x17
+	buf[1] = 0x03
+	buf[2] = 0x03
+	binary.BigEndian.PutUint16(buf[3:5], uint16(bodyLen))
+	
+	copy(buf[5:5+NonceLength], nonce[:])
+	copy(buf[5+NonceLength:], ciphertext)
 
 	return w.Write(buf)
 }
@@ -82,7 +87,11 @@ func ReadPacket(r io.Reader, dec *crypto.Decryptor) (*PlainPacket, error) {
 		return nil, err
 	}
 
-	bodyLen := int(binary.BigEndian.Uint32(headerBuf))
+	if headerBuf[0] != 0x17 || headerBuf[1] != 0x03 || headerBuf[2] != 0x03 {
+		return nil, ErrInvalidPacketLength
+	}
+
+	bodyLen := int(binary.BigEndian.Uint16(headerBuf[3:5]))
 	if bodyLen < NonceLength || bodyLen > PacketMaxLength {
 		return nil, ErrInvalidPacketLength
 	}

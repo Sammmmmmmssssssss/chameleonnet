@@ -47,7 +47,7 @@ func BenchmarkHandshakeUnmarshal(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		var msg HandshakeMessage
+		var msg FakeTLSClientHello
 		_ = msg.Unmarshal(data)
 	}
 }

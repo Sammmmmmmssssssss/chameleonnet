@@ -1,0 +1,8 @@
+2026/07/02 00:57:54 main.go:31: ChameleonNet v0.1.0 starting (Go go1.26.4, 8 CPUs)
+2026/07/02 00:57:54 main.go:38: mode=server listen=127.0.0.1:9090 target= profile=generic maxconn=100 bufsize=32768
+ChameleonNet v0.1.0
+  Go:      go1.26.4
+  Arch:    darwin/arm64
+  PID:     3959
+2026/07/02 00:57:54 main.go:89: server relay listening on 127.0.0.1:9090
+signal: killed

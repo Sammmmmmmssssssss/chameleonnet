@@ -16,59 +16,36 @@ func TestHandshakeMessageMarshalUnmarshal(t *testing.T) {
 	msg := NewHandshakeMessage(salt)
 	data := msg.Marshal()
 
-	var unmarshaled HandshakeMessage
+	var unmarshaled FakeTLSClientHello
 	if err := unmarshaled.Unmarshal(data); err != nil {
 		t.Fatal(err)
 	}
 
-	if string(unmarshaled.Magic[:]) != MagicBytes {
-		t.Errorf("Magic = %q, want %q", unmarshaled.Magic, MagicBytes)
-	}
-	if unmarshaled.Version != Version {
-		t.Errorf("Version = %d, want %d", unmarshaled.Version, Version)
-	}
 	if unmarshaled.Salt != salt {
 		t.Errorf("Salt mismatch")
 	}
 }
 
 func TestHandshakeMessageInvalidMagic(t *testing.T) {
-	data := make([]byte, MagicLength+1+crypto.SaltSize)
-	data[0] = 'X'
-	data[1] = 'X'
-	data[2] = 'X'
-	data[3] = 'X'
-
-	var msg HandshakeMessage
+	data := make([]byte, 50)
+	var msg FakeTLSClientHello
 	if err := msg.Unmarshal(data); err != ErrInvalidMagic {
 		t.Errorf("got %v, want ErrInvalidMagic", err)
 	}
 }
 
-func TestHandshakeMessageInvalidVersion(t *testing.T) {
-	salt, _ := crypto.RandomSalt()
-	msg := NewHandshakeMessage(salt)
-	msg.Version = 0xFF
-	data := msg.Marshal()
-
-	var unmarshaled HandshakeMessage
-	if err := unmarshaled.Unmarshal(data); err != ErrInvalidVersion {
-		t.Errorf("got %v, want ErrInvalidVersion", err)
-	}
-}
-
 func TestHandshakeMessageShortData(t *testing.T) {
-	var msg HandshakeMessage
+	var msg FakeTLSClientHello
 	if err := msg.Unmarshal([]byte{0x00}); err == nil {
 		t.Error("expected error for short data")
 	}
 }
 
 func TestHandshakeResponse(t *testing.T) {
-	resp := HandshakeResponse{Status: HandshakeOK}
+	resp := FakeTLSServerHello{Status: HandshakeOK}
 	data := resp.Marshal()
 
-	var unmarshaled HandshakeResponse
+	var unmarshaled FakeTLSServerHello
 	if err := unmarshaled.Unmarshal(data); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +55,7 @@ func TestHandshakeResponse(t *testing.T) {
 }
 
 func TestHandshakeResponseError(t *testing.T) {
-	err := (&HandshakeResponse{}).Unmarshal(nil)
+	err := (&FakeTLSServerHello{}).Unmarshal(nil)
 	if err == nil {
 		t.Error("expected error for nil data")
 	}

@@ -28,6 +28,22 @@ Client App ──SOCKS5──▶ Local Proxy ──morphed tunnel──▶ Remot
 - **Graceful shutdown** — context-based draining with configurable timeouts
 - **60s metrics dump** — real-time visibility into traffic, connections, memory, GC, buffer pool, and errors
 
+> [!CAUTION]
+> **Defensive Research Disclaimer:** ChameleonNet is a **"Dual-Use"** defensive network analysis tool built exclusively for Educational Purposes, Red Teaming, and DPI Research. It is designed to expose blind spots in enterprise firewalls and nation-state DPI architectures so that defensive engineers (e.g., CERTs) can study evasion techniques and build stronger heuristic detection algorithms. The authors do not condone or support the use of this tool for malicious censorship circumvention or illegal activities.
+
+## Design Philosophy
+
+- **Zero-Dependency:** Written in 100% pure Go standard library. No `golang.org/x/crypto`, no `yaml` parsers, no external logging frameworks. If it's not in the stdlib, we wrote it from scratch.
+- **Zero-Copy & GC Optimized:** Extensive use of `sync.Pool` with size classes to recycle network buffers and AES-GCM blocks, achieving a sub-15MB heap footprint under load.
+- **Protocol Obfuscation:** Unlike standard tunnels that use static signatures, ChameleonNet employs polymorphic traffic shaping (Exponential + LogNormal mixtures) and fake TLS 1.3 ClientHello masking to defeat advanced traffic analysis.
+
+## How to Detect (For Blue Teams / SOCs)
+
+While ChameleonNet masks its payload inside fake TLS 1.3 and injects chaff, defensive systems can still identify it by looking for specific behavioral anomalies:
+1. **Perfect Poisson Chaffing:** The chaff injection follows a perfectly mathematical Poisson distribution. Advanced statistical analysis on packet inter-arrival times can flag this "too-perfect" randomness.
+2. **Fixed TLS 1.3 ClientHello Fingerprint:** If configured with a static SNI (e.g., `www.cloudflare.com`) but the IP address resolves to a known VPS provider rather than an actual CDN edge node, the IP/SNI mismatch is a high-confidence indicator.
+3. **No TLS Session Resumption:** ChameleonNet's fake TLS 1.3 handshake never attempts session resumption (0-RTT) or sends standard ALPN extensions that real browsers typically send.
+
 ## Quick Start
 
 ### 1. Build

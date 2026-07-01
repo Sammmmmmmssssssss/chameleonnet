@@ -5,12 +5,14 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
+	"math/rand"
 	"net"
 	"sync"
 	"time"
 
 	"chameleonnet/internal/config"
 	"chameleonnet/internal/crypto"
+	"chameleonnet/internal/morpher"
 )
 
 type Server struct {
@@ -122,13 +124,24 @@ func (s *Server) handleConn(ctx context.Context, tunnel net.Conn) {
 }
 
 func (s *Server) handshake(tunnel net.Conn) (*ServerConn, error) {
-	buf := make([]byte, MagicLength+1+crypto.SaltSize)
-	if _, err := io.ReadFull(tunnel, buf); err != nil {
+	// Read FakeTLSClientHello header
+	header := make([]byte, 5)
+	if _, err := io.ReadFull(tunnel, header); err != nil {
+		return nil, err
+	}
+	recordLen := int(header[3])<<8 | int(header[4])
+	if recordLen > 8192 {
+		return nil, errors.New("invalid TLS record length")
+	}
+
+	payload := make([]byte, recordLen)
+	if _, err := io.ReadFull(tunnel, payload); err != nil {
 		return nil, err
 	}
 
-	var msg HandshakeMessage
-	if err := msg.Unmarshal(buf); err != nil {
+	fullRecord := append(header, payload...)
+	var msg FakeTLSClientHello
+	if err := msg.Unmarshal(fullRecord); err != nil {
 		return nil, err
 	}
 
@@ -160,7 +173,7 @@ func (s *Server) handshake(tunnel net.Conn) (*ServerConn, error) {
 	enc.SetNoncePrefix(serverPrefix)
 	dec.SetNoncePrefix(clientPrefix)
 
-	resp := HandshakeResponse{Status: HandshakeOK}
+	resp := FakeTLSServerHello{Status: 0x00} // HandshakeOK
 	if _, err := tunnel.Write(resp.Marshal()); err != nil {
 		return nil, err
 	}
@@ -196,84 +209,139 @@ func (sc *ServerConn) dialTarget(addr string) (net.Conn, error) {
 	return dialer.Dial("tcp", addr)
 }
 
+func (sc *ServerConn) WriteChaff(payload []byte) error {
+	pkt := &PlainPacket{
+		Type:    PacketChaff,
+		Payload: payload,
+	}
+	sc.writeMu.Lock()
+	defer sc.writeMu.Unlock()
+	_, err := WritePacket(sc.tunnel, pkt, sc.enc)
+	return err
+}
+
 func (sc *ServerConn) relayBidirectional(ctx context.Context, target net.Conn) {
-	var wg sync.WaitGroup
+	prof := morpher.LookupProfile(morpher.ProfileName(sc.config.Profile))
+	padder := morpher.NewPadder(prof.PadderBuckets)
+	shaper := morpher.NewShaper(time.Now().UnixNano(), prof.ShaperServer)
+
 	relayCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	wg.Add(2)
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	// ── Goroutine 1: target → tunnel (upload to client with padding + shaping)
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		_ = sc.readFromTunnelWriteToTarget(relayCtx, target)
+
+		buf := make([]byte, sc.config.BufferSize)
+		for {
+			select {
+			case <-relayCtx.Done():
+				return
+			default:
+			}
+
+			n, err := target.Read(buf)
+			if n > 0 {
+				padded := padder.Pad(buf[:n])
+
+				delay := shaper.NextDelay()
+				if delay > 0 {
+					select {
+					case <-relayCtx.Done():
+						return
+					case <-time.After(delay):
+					}
+				}
+
+				pkt := &PlainPacket{
+					Type:    PacketReal,
+					Payload: padded,
+				}
+				sc.writeMu.Lock()
+				_, werr := WritePacket(sc.tunnel, pkt, sc.enc)
+				sc.writeMu.Unlock()
+
+				if werr != nil {
+					return
+				}
+			}
+			if err != nil {
+				return
+			}
+		}
 	}()
+
+	// ── Goroutine 2: tunnel → target (download from client with depadding)
 	go func() {
 		defer wg.Done()
 		defer cancel()
-		_ = sc.readFromTargetWriteToTunnel(relayCtx, target)
+
+		for {
+			select {
+			case <-relayCtx.Done():
+				return
+			default:
+			}
+			if sc.config.ReadTimeout > 0 {
+				_ = sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration()))
+			}
+			pkt, err := ReadPacket(sc.tunnel, sc.dec)
+			if sc.config.ReadTimeout > 0 {
+				_ = sc.tunnel.SetReadDeadline(time.Time{})
+			}
+
+			if err != nil {
+				return
+			}
+			if pkt.Type == PacketChaff {
+				continue
+			}
+			if len(pkt.Payload) > 0 {
+				unpadded, _ := padder.RemovePadding(pkt.Payload)
+				if len(unpadded) > 0 {
+					if _, werr := target.Write(unpadded); werr != nil {
+						return
+					}
+				}
+			}
+		}
 	}()
+
+	// ── Goroutine 3: chaff injection (server to client)
+	go func() {
+		defer wg.Done()
+
+		lambda := prof.ChaffLambda
+		if lambda <= 0 {
+			return
+		}
+
+		chaffSize := prof.PadderBuckets[0]
+		rng := rand.New(rand.NewSource(time.Now().UnixNano() + 0xCAFE))
+		poisson := morpher.NewPoissonProcessNoLock(time.Now().UnixNano()+0xFEED, lambda)
+
+		for {
+			interval := poisson.NextInterval()
+			select {
+			case <-relayCtx.Done():
+				return
+			case <-time.After(interval):
+			}
+
+			payload := make([]byte, chaffSize)
+			_, _ = rng.Read(payload)
+
+			if werr := sc.WriteChaff(payload); werr != nil {
+				return
+			}
+		}
+	}()
+
 	wg.Wait()
-}
-
-func (sc *ServerConn) readFromTunnelWriteToTarget(ctx context.Context, target net.Conn) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
-		if sc.config.ReadTimeout > 0 {
-			_ = sc.tunnel.SetReadDeadline(time.Now().Add(sc.config.ReadTimeout.Duration()))
-		}
-		pkt, err := ReadPacket(sc.tunnel, sc.dec)
-		if sc.config.ReadTimeout > 0 {
-			_ = sc.tunnel.SetReadDeadline(time.Time{})
-		}
-		if err != nil {
-			return err
-		}
-		if pkt.Type == PacketChaff {
-			continue
-		}
-		if len(pkt.Payload) > 0 {
-			if _, err := target.Write(pkt.Payload); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-func (sc *ServerConn) readFromTargetWriteToTunnel(ctx context.Context, target net.Conn) error {
-	buf := make([]byte, 32768)
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-		}
-		n, err := target.Read(buf)
-		if n > 0 {
-			pkt := &PlainPacket{
-				Type:    PacketReal,
-				Payload: make([]byte, n),
-			}
-			copy(pkt.Payload, buf[:n])
-
-			sc.writeMu.Lock()
-			_, writeErr := WritePacket(sc.tunnel, pkt, sc.enc)
-			sc.writeMu.Unlock()
-
-			if writeErr != nil {
-				return writeErr
-			}
-		}
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			}
-			return err
-		}
-	}
 }
 
 func (sc *ServerConn) Close() error {

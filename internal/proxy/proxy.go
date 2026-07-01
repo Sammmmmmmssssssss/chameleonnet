@@ -248,7 +248,7 @@ func (p *Proxy) handleHTTP(ctx context.Context, conn net.Conn, br *bufio.Reader)
 //
 // Any goroutine finishing cancels the shared context, unblocking the others.
 func (p *Proxy) morphedRelay(ctx context.Context, local net.Conn, remote *tunnel.ClientConn) {
-	defer remote.Close()
+	defer func() { _ = remote.Close() }()
 
 	prof := morpher.LookupProfile(morpher.ProfileName(p.config.Profile))
 	padder := morpher.NewPadder(prof.PadderBuckets)
